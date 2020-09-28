@@ -140,7 +140,9 @@ class TTN(nn.Module):
         return output, quantum_layer4
 
 def main():
+    print('--------------------------start training----------------------------\nThe structure of this HTN are as below!')
     ttn = TTN().to(device)
+    print(TTN())
     start_time = time.time()
     # writer.add_graph(ttn, images)
     optimizer = torch.optim.Adam(ttn.parameters(), lr=LR)  # optimize all cnn parameters, if you just want to optimize tensorL1, please use ttn.tensorL1.parameters()
@@ -175,19 +177,19 @@ def main():
             b_x = Variable(x).to(device)  # batch x
             b_y = Variable(y).to(device) # batch y
 
-            output1 = ttn(b_x)[0] # cnn output
+            output = ttn(b_x)[0] # cnn output
 
             # quantum_layer = ttn(b_x)[1].detach().cpu()
             # plt.imshow(quantum_layer[0, :, :,0], cmap='gray')
             # plt.show()
             # plt.pause(0.1)
 
-            pred_y = torch.max(output1, 1)[1]
+            pred_y = torch.max(output, 1)[1]
             sum = int(torch.sum(pred_y == b_y))
             accuracy = sum / BATCH_SIZE
 
-            loss = loss_func(output1, b_y)  # cross entropy loss
-            LOSS.append(loss)
+            loss = loss_func(output, b_y)  # cross entropy loss
+            LOSS.append(loss.item())
             optimizer.zero_grad()  # clear gradients for this training step
             
             print('Epoch: ', epoch, '| train loss: %.4f' % loss.item(), '| test accuracy: %.2f' % accuracy)
