@@ -34,8 +34,8 @@ bond_inner = 3
 n_train = 60000
 
 
-loadcheckpoint = 1
-GPU_flag = 1
+loadcheckpoint = 0
+GPU_flag = 0
 
 if GPU_flag ==1:
     device = torch.device("cuda:0")
@@ -69,10 +69,10 @@ trainl = torch.LongTensor(train_data.targets[0:n_train].numpy())
 datatensor = Data.TensorDataset(trainx, trainl) # wrap trainx and trainl by Data.TensorDataset
 train_loader = Data.DataLoader(dataset=datatensor, batch_size=BATCH_SIZE, shuffle=True) # wrap datatensor by Data.DataLoader
 
-test_data = torchvision.datasets.MNIST(root='./mnist/', train=False)
-testx = feature_map(test_data.data, bond_data)
-test_x = Variable(testx, requires_grad=True)
-test_l = test_data.targets
+# test_data = torchvision.datasets.MNIST(root='./mnist/', train=False)
+# testx = feature_map(test_data.data, bond_data)
+# test_x = Variable(testx, requires_grad=True)
+# test_l = test_data.targets
 
 
 class TensorLayer(nn.Module):
@@ -166,14 +166,15 @@ def main():
             b_x = Variable(x).to(device)  # batch x
             b_y = Variable(y) .to(device) # batch y
 
-            output1 = ttn(b_x)[0] # cnn output
-
+            output = ttn(b_x)[0] # cnn output
+            pred_y = torch.max(output,1)[1]
+            accuracy = int(torch.sum(b_y == pred_y)) / BATCH_SIZE
             # quantum_layer = ttn(b_x)[1].detach().cpu()
             # plt.imshow(quantum_layer[0, :, :,0], cmap='gray')
             # plt.show()
             # plt.pause(0.1)
 
-            loss = loss_func(output1, b_y)  # cross entropy loss
+            loss = loss_func(output, b_y)  # cross entropy loss
             optimizer.zero_grad()  # clear gradients for this training step
             loss.backward()  # backpropagation, compute gradients
             optimizer.step()  # apply gradients
